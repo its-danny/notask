@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" preserveAspectRatio="xMidYMid meet">
+  <!-- Background rounded rectangle -->
+  <rect x="0" y="0" width="24" height="24" rx="6" ry="6" fill="black"></rect>
+  <!-- Inner card -->
+  <rect x="6" y="4" width="12" height="16" rx="2" ry="2" fill="black" stroke="white"></rect>
+  <!-- Task lines -->
+  <line x1="9" y1="13" x2="15" y2="13" stroke="white"></line>
+  <line x1="9" y1="16" x2="12" y2="16" stroke="white"></line>
+  <!-- Checkmark -->
+  <path d="M9.5 8.5l1.5 1.5 3.5-3.5" stroke="white" stroke-width="2"></path>
+</svg>
