@@ -31,6 +31,6 @@ export async function exportToLinear(tasks: Task[]) {
         priority: task.priority,
         labelIds: task.tags.map((tag) => tag.id),
       });
-    })
+    }),
   );
 }

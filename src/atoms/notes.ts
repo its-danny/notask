@@ -31,5 +31,5 @@ export const processNotesAtom = atom(
     } finally {
       set(isProcessingAtom, false);
     }
-  }
+  },
 );

@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "pretty": "prettier --write .",
+    "prepare": "husky"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.1.17",
@@ -17,6 +19,7 @@
     "ai": "^4.1.61",
     "jotai": "^2.12.2",
     "next": "15.2.2",
+    "prettier": "^3.5.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
@@ -27,6 +30,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.2.2",
+    "husky": "^9.1.7",
     "typescript": "^5"
   }
 }

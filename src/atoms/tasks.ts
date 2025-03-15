@@ -36,7 +36,7 @@ export const addTaskAtom = atom(
     };
 
     set(tasksAtom, [...tasks, newTask]);
-  }
+  },
 );
 
 export const removeTaskAtom = atom(
@@ -46,9 +46,9 @@ export const removeTaskAtom = atom(
 
     set(
       tasksAtom,
-      tasks.filter((task) => task.id !== id)
+      tasks.filter((task) => task.id !== id),
     );
-  }
+  },
 );
 
 export const selectedTasksAtom = atom<Task[]>([]);
@@ -58,5 +58,5 @@ export const toggleTaskSelectionAtom = atom(
   (get, set, task: Task) => {
     const selectedTasks = get(selectedTasksAtom);
     set(selectedTasksAtom, [...selectedTasks, task]);
-  }
+  },
 );

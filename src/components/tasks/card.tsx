@@ -20,7 +20,7 @@ export default function TasksCard() {
 
   const handleSave = (updatedTask: Task) => {
     setTasks(
-      tasks.map((task) => (task.id === updatedTask.id ? updatedTask : task))
+      tasks.map((task) => (task.id === updatedTask.id ? updatedTask : task)),
     );
     setEditingTask(null);
   };
@@ -28,7 +28,7 @@ export default function TasksCard() {
   const handleExport = async () => {
     try {
       await exportToLinear(
-        tasks.filter((task) => selectedTasks.includes(task))
+        tasks.filter((task) => selectedTasks.includes(task)),
       );
     } catch (error) {
       console.error(error);

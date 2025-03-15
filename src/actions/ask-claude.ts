@@ -27,7 +27,7 @@ export async function askClaude(input: string) {
   const orgLabels = await organization.labels();
   const teams = await linearUser.teams();
   const teamLabels = await Promise.all(
-    teams.nodes.map((team) => team.labels())
+    teams.nodes.map((team) => team.labels()),
   );
 
   const allLabels = [
@@ -44,7 +44,7 @@ export async function askClaude(input: string) {
   }));
 
   const teamMembers = await Promise.all(
-    teams.nodes.map((team) => team.members())
+    teams.nodes.map((team) => team.members()),
   );
 
   const allTeamMembers = teamMembers.flatMap((team) => team.nodes);
@@ -118,7 +118,7 @@ export async function askClaude(input: string) {
             (member) =>
               `- ${member.id}: ${member.name} (${allTeams
                 .map((team) => team.name)
-                .join(", ")})`
+                .join(", ")})`,
           )
           .join("\n")}
     `,
