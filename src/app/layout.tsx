@@ -7,6 +7,9 @@ export default function Layout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/logo.svg" />
+      </head>
       <body>
         <Theme accentColor="ruby">{children}</Theme>
       </body>
