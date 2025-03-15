@@ -66,7 +66,7 @@ export default function NotesCard() {
             ) : (
               <>
                 <MagicWandIcon />
-                Extract Tasks
+                Extract
               </>
             )}
           </Flex>

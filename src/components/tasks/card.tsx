@@ -1,6 +1,6 @@
 import { Card, Flex, Heading, Button } from "@radix-ui/themes";
 import { CheckboxIcon, DownloadIcon } from "@radix-ui/react-icons";
-import TaskItem from "./task";
+import ReadyTask from "./ready-task";
 import EditTask from "./edit";
 import { useAtom } from "jotai";
 import {
@@ -11,6 +11,7 @@ import {
 } from "@/atoms/tasks";
 import { useState } from "react";
 import { exportToLinear } from "@/actions/export-to-linear";
+import ExportedTask from "./exported-task";
 
 export default function TasksCard() {
   const [tasks, setTasks] = useAtom(tasksAtom);
@@ -27,9 +28,11 @@ export default function TasksCard() {
 
   const handleExport = async () => {
     try {
-      await exportToLinear(
+      const exportedTasks = await exportToLinear(
         tasks.filter((task) => selectedTasks.includes(task)),
       );
+
+      setTasks(exportedTasks);
     } catch (error) {
       console.error(error);
     }
@@ -64,14 +67,18 @@ export default function TasksCard() {
                 direction="column"
                 style={{ paddingBottom: "var(--space-6)" }}
               >
-                {tasks.map((task) => (
-                  <TaskItem
-                    key={task.id}
-                    task={task}
-                    onEdit={setEditingTask}
-                    onDelete={removeTask}
-                  />
-                ))}
+                {tasks.map((task) =>
+                  task.url ? (
+                    <ExportedTask key={task.id} task={task} />
+                  ) : (
+                    <ReadyTask
+                      key={task.id}
+                      task={task}
+                      onEdit={setEditingTask}
+                      onDelete={removeTask}
+                    />
+                  ),
+                )}
               </Flex>
 
               <Flex
@@ -87,7 +94,7 @@ export default function TasksCard() {
               >
                 <Button onClick={handleExport}>
                   <DownloadIcon />
-                  Export Tasks
+                  Export
                 </Button>
               </Flex>
             </Flex>

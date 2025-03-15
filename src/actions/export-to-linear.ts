@@ -20,9 +20,9 @@ export async function exportToLinear(tasks: Task[]) {
     accessToken: token,
   });
 
-  await Promise.all(
+  const exportedTasks = await Promise.all(
     tasks.map(async (task) => {
-      await linear.createIssue({
+      const issuePayload = await linear.createIssue({
         teamId: task.team.id,
         title: task.title,
         description: task.description,
@@ -31,6 +31,15 @@ export async function exportToLinear(tasks: Task[]) {
         priority: task.priority,
         labelIds: task.tags.map((tag) => tag.id),
       });
+
+      const issue = await issuePayload.issue;
+
+      return {
+        ...task,
+        url: issue?.url,
+      };
     }),
   );
+
+  return exportedTasks;
 }

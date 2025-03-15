@@ -21,6 +21,7 @@ export interface Task {
   description: string;
   tags: { id: string; name: string }[];
   confidence: Confidence;
+  url?: string;
 }
 
 export const tasksAtom = atomWithStorage<Task[]>("tasks", []);

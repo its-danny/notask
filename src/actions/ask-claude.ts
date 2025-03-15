@@ -26,28 +26,14 @@ export async function askClaude(input: string) {
   const organization = await linearUser.organization;
   const orgLabels = await organization.labels();
   const teams = await linearUser.teams();
-  const teamLabels = await Promise.all(
-    teams.nodes.map((team) => team.labels()),
+
+  const teamsWithData = await Promise.all(
+    teams.nodes.map(async (team) => ({
+      ...team,
+      labels: await team.labels(),
+      members: await team.members(),
+    })),
   );
-
-  const allLabels = [
-    ...orgLabels.nodes,
-    ...teamLabels.flatMap((team) => team.nodes),
-  ].map((label) => ({
-    id: label.id,
-    name: label.name,
-  }));
-
-  const allTeams = teams.nodes.map((team) => ({
-    id: team.id,
-    name: team.name,
-  }));
-
-  const teamMembers = await Promise.all(
-    teams.nodes.map((team) => team.members()),
-  );
-
-  const allTeamMembers = teamMembers.flatMap((team) => team.nodes);
 
   const { text } = await generateText({
     model: anthropic("claude-3-7-sonnet-20250219"),
@@ -101,24 +87,26 @@ export async function askClaude(input: string) {
 
         ${linearUser.id}: ${linearUser.name}
 
-        ## Existing tags
+        ## Organization Tags
 
-        ${allLabels.map((label) => `- ${label.id}: ${label.name}`).join("\n")}
+        ${orgLabels.nodes.map((label) => `- ${label.id}: ${label.name}`).join("\n")}
 
-        ## Teams
+        ## Teams and their Members & Tags
 
-        ${allTeams.map((team) => `- ${team.id}: ${team.name}`).join("\n")}
+        Only assign tags that are either in the organization or the team you've assigned to the task.
+        Only assign members that are in the team you've assigned to the task.
 
-        ## Team members
-
-        Only assign tasks to team members that are listed below and are on the team you chose to assign the task to.
-
-        ${allTeamMembers
+        ${teamsWithData
           .map(
-            (member) =>
-              `- ${member.id}: ${member.name} (${allTeams
-                .map((team) => team.name)
-                .join(", ")})`,
+            (team) => `
+            ### Team - ${team.id}: ${team.name}
+
+            #### Members:
+            ${team.members.nodes.map((member) => `- ${member.id}: ${member.name}`).join("\n") || "No members"}
+
+            #### Tags:
+            ${team.labels.nodes.map((label) => `- ${label.id}: ${label.name}`).join("\n") || "No tags"}
+            `,
           )
           .join("\n")}
     `,
