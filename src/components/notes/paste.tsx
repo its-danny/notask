@@ -20,6 +20,12 @@ export default function Paste() {
     onUpdate: ({ editor }) => {
       setNotes(editor.getText());
     },
+    editorProps: {
+      attributes: {
+        class: "prose focus:outline-none max-w-none",
+      },
+    },
+    immediatelyRender: false,
   });
 
   return <EditorContent editor={editor} />;

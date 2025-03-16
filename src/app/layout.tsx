@@ -3,7 +3,10 @@ import "@radix-ui/themes/styles.css";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import ErrorDisplay from "@/components/error-display";
-import "@/utils/error";
+import SuccessDisplay from "@/components/success-display";
+import { Provider } from "jotai";
+import "../utils/error";
+
 const inter = Inter({ subsets: ["latin"] });
 
 export default function RootLayout({
@@ -16,12 +19,15 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/logo.svg" />
       </head>
-
       <body className={inter.className}>
-        <Theme>
-          {children}
-          <ErrorDisplay />
-        </Theme>
+        <Provider>
+          <Theme>
+            {children}
+
+            <ErrorDisplay />
+            <SuccessDisplay />
+          </Theme>
+        </Provider>
       </body>
     </html>
   );

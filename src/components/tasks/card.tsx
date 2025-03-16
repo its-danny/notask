@@ -12,12 +12,14 @@ import {
 import { useState } from "react";
 import { exportToLinear } from "@/actions/export-to-linear";
 import ExportedTask from "./exported-task";
+import { setSuccessAtom } from "@/atoms/success";
 
 export default function TasksCard() {
   const [tasks, setTasks] = useAtom(tasksAtom);
   const [, removeTask] = useAtom(removeTaskAtom);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [selectedTasks] = useAtom(selectedTasksAtom);
+  const [, setSuccess] = useAtom(setSuccessAtom);
 
   const handleSave = (updatedTask: Task) => {
     setTasks(
@@ -28,11 +30,15 @@ export default function TasksCard() {
 
   const handleExport = async () => {
     try {
-      const exportedTasks = await exportToLinear(
-        tasks.filter((task) => selectedTasks.includes(task)),
+      const selectedTasksList = tasks.filter((task) =>
+        selectedTasks.includes(task),
       );
+      const exportedTasks = await exportToLinear(selectedTasksList);
 
       setTasks(exportedTasks);
+      setSuccess(
+        `Successfully exported ${selectedTasksList.length} task${selectedTasksList.length === 1 ? "" : "s"} to Linear`,
+      );
     } catch (error) {
       console.error(error);
     }
