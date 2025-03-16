@@ -1,9 +1,11 @@
 "use server";
 
-import { anthropic } from "@ai-sdk/anthropic";
 import { auth, clerkClient } from "@clerk/nextjs/server";
-import { LinearClient } from "@linear/sdk";
 import { generateText } from "ai";
+import { anthropic } from "@ai-sdk/anthropic";
+import { LinearClient } from "@linear/sdk";
+import { taskSchema } from "@/schemas/task";
+import { z } from "zod";
 
 export async function askClaude(input: string | File) {
   const { userId } = await auth();
@@ -126,9 +128,12 @@ export async function askClaude(input: string | File) {
   });
 
   try {
-    return JSON.parse(text);
+    const parsedJson = JSON.parse(text);
+    const validatedTasks = z.array(taskSchema).parse(parsedJson);
+
+    return validatedTasks;
   } catch (error) {
-    console.error(error);
+    console.error("Failed to parse or validate tasks:", error);
 
     return [];
   }

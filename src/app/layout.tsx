@@ -19,9 +19,10 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/logo.svg" />
       </head>
+
       <body className={inter.className}>
         <Provider>
-          <Theme>
+          <Theme accentColor="ruby">
             {children}
 
             <ErrorDisplay />
