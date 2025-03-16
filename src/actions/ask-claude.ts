@@ -5,7 +5,7 @@ import { auth, clerkClient } from "@clerk/nextjs/server";
 import { LinearClient } from "@linear/sdk";
 import { generateText } from "ai";
 
-export async function askClaude(input: string) {
+export async function askClaude(input: string | File) {
   const { userId } = await auth();
 
   if (!userId) throw new Error("Not authenticated");
@@ -34,6 +34,13 @@ export async function askClaude(input: string) {
       members: await team.members(),
     })),
   );
+
+  let textContent: string;
+  if (input instanceof File) {
+    textContent = await input.text();
+  } else {
+    textContent = input;
+  }
 
   const { text } = await generateText({
     model: anthropic("claude-3-7-sonnet-20250219"),
@@ -75,7 +82,7 @@ export async function askClaude(input: string) {
                 "title": "The task title starting with an action verb",
                 "assignee": "Name of person assigned or null if not specified, {id: "assignee1", name: "assignee1"}",
                 "due_date": "YYYY-MM-DD or null if not specified",
-                "priority": "No priority = 0, Urgent = 1, High = 2, Normal = 3, Low = 4. (integer)",
+                "priority": "No priority = 0, Urgent = 1, High = 2, Normal = 3, Low = 4",
                 "description": "Brief context from surrounding text",
                 "tags": [{id: "tag1", name: "tag1"}, {id: "tag2", name: "tag2"}] or [] if none specified,
                 "confidence": "high/medium/low based on how clearly this was stated in the notes",
@@ -110,7 +117,7 @@ export async function askClaude(input: string) {
           )
           .join("\n")}
     `,
-    prompt: input,
+    prompt: textContent,
     providerOptions: {
       anthropic: {
         thinking: { type: "enabled", budgetTokens: 12000 },

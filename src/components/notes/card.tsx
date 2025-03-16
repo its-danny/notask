@@ -11,10 +11,11 @@ import {
 import Paste from "./paste";
 import Upload from "./upload";
 import { useAtom } from "jotai";
-import { processNotesAtom } from "@/atoms/notes";
+import { activeTabAtom, processNotesAtom } from "@/atoms/notes";
 
 export default function NotesCard() {
   const [{ isProcessing }, processNotes] = useAtom(processNotesAtom);
+  const [activeTab, setActiveTab] = useAtom(activeTabAtom);
 
   return (
     <Card>
@@ -29,7 +30,10 @@ export default function NotesCard() {
         </Text>
       </Flex>
 
-      <Tabs.Root defaultValue="paste">
+      <Tabs.Root
+        value={activeTab}
+        onValueChange={(value) => setActiveTab(value as "paste" | "upload")}
+      >
         <Tabs.List>
           <Tabs.Trigger value="paste">
             <Flex align="center" gap="2">

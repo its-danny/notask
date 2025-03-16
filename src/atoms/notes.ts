@@ -3,28 +3,41 @@ import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 import { addTaskAtom, Task, tasksAtom } from "./tasks";
 
-export const notesAtom = atomWithStorage<string>("notes", "");
+export type NotesTab = "paste" | "upload";
 
+export const notesAtom = atomWithStorage<string>("notes", "");
+export const uploadedFileAtom = atom<File | null>(null);
+export const activeTabAtom = atom<NotesTab>("paste");
 export const isProcessingAtom = atom<boolean>(false);
 
 export const processNotesAtom = atom(
   (get) => ({
     notes: get(notesAtom),
     isProcessing: get(isProcessingAtom),
+    activeTab: get(activeTabAtom),
+    uploadedFile: get(uploadedFileAtom),
   }),
   async (get, set) => {
     const notes = get(notesAtom);
+    const activeTab = get(activeTabAtom);
+    const uploadedFile = get(uploadedFileAtom);
 
-    if (!notes.trim()) return;
+    // Clear existing tasks
+    set(tasksAtom, []);
 
     try {
       set(isProcessingAtom, true);
 
-      set(tasksAtom, []);
+      let response;
+      if (activeTab === "paste") {
+        if (!notes.trim()) return;
+        response = await askClaude(notes);
+      } else {
+        if (!uploadedFile) return;
+        response = await askClaude(uploadedFile);
+      }
 
-      const response = await askClaude(notes);
       const tasks = response as Task[];
-
       tasks.forEach((task) => {
         set(addTaskAtom, task);
       });
@@ -32,6 +45,10 @@ export const processNotesAtom = atom(
       console.error("Failed to process notes:", error);
     } finally {
       set(isProcessingAtom, false);
+      // Clear the uploaded file after processing
+      if (activeTab === "upload") {
+        set(uploadedFileAtom, null);
+      }
     }
   },
 );

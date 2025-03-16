@@ -1,11 +1,12 @@
-import { UploadIcon } from "@radix-ui/react-icons";
+import { uploadedFileAtom } from "@/atoms/notes";
+import { UploadIcon, Cross2Icon } from "@radix-ui/react-icons";
 import { Badge, Box, Button, Flex, Text } from "@radix-ui/themes";
+import { useAtom } from "jotai";
 import { useRef, useState } from "react";
 
 const MAX_FILE_SIZE = 1.5 * 1024 * 1024; // 1.5MB in bytes
 const ACCEPTED_FILE_TYPES = ".txt,.md,.rtf";
 
-// File type icons as components for consistency
 const FileIcon = () => (
   <svg
     width="12"
@@ -60,11 +61,14 @@ const RichTextIcon = () => (
 
 export default function Upload() {
   const [dragActive, setDragActive] = useState(false);
+  const [uploadedFile, setUploadedFile] = useAtom(uploadedFileAtom);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (uploadedFile) return;
 
     if (e.type === "dragenter" || e.type === "dragover") {
       setDragActive(true);
@@ -76,6 +80,8 @@ export default function Upload() {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (uploadedFile) return;
 
     setDragActive(false);
 
@@ -101,9 +107,57 @@ export default function Upload() {
         return;
       }
 
-      console.log("File to upload:", file);
+      const fileExtension = file.name.split(".").pop()?.toLowerCase();
+      const acceptedExtensions = ACCEPTED_FILE_TYPES.split(",").map((type) =>
+        type.replace(".", "").toLowerCase(),
+      );
+
+      if (!fileExtension || !acceptedExtensions.includes(fileExtension)) {
+        alert(`Invalid file type. Accepted types are: ${ACCEPTED_FILE_TYPES}`);
+
+        return;
+      }
+
+      setUploadedFile(file);
+
+      if (inputRef.current) {
+        inputRef.current.value = "";
+      }
     }
   };
+
+  const handleRemove = () => {
+    setUploadedFile(null);
+
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
+  };
+
+  if (uploadedFile) {
+    return (
+      <Box p="6">
+        <Flex direction="column" gap="2">
+          <Flex align="center" gap="2">
+            <FileIcon />
+
+            <Text size="2" weight="bold" style={{ flex: 1 }}>
+              {uploadedFile.name}
+            </Text>
+
+            <Button variant="soft" color="red" onClick={handleRemove}>
+              <Cross2Icon />
+              Remove
+            </Button>
+          </Flex>
+
+          <Text size="1" color="gray">
+            {(uploadedFile.size / 1024).toFixed(1)} KB
+          </Text>
+        </Flex>
+      </Box>
+    );
+  }
 
   return (
     <Box
