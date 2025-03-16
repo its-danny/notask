@@ -1,5 +1,5 @@
 import { Task, Priority } from "@/atoms/tasks";
-import { ArrowLeftIcon, BarChartIcon } from "@radix-ui/react-icons";
+import { ArrowLeftIcon, BarChartIcon, PlusIcon } from "@radix-ui/react-icons";
 import {
   Badge,
   Box,
@@ -13,14 +13,79 @@ import {
 } from "@radix-ui/themes";
 import { useState } from "react";
 
+interface TeamMetadata {
+  id: string;
+  name: string;
+  members: { id: string; name: string }[];
+  labels: { id: string; name: string }[];
+}
+
+interface Metadata {
+  teams: TeamMetadata[];
+  organizationLabels: { id: string; name: string }[];
+}
+
 interface EditTaskProps {
   task: Task;
+  metadata: Metadata;
   onSave: (task: Task) => void;
   onCancel: () => void;
 }
 
-export default function EditTask({ task, onSave, onCancel }: EditTaskProps) {
+export default function EditTask({
+  task,
+  metadata,
+  onSave,
+  onCancel,
+}: EditTaskProps) {
   const [editedTask, setEditedTask] = useState(task);
+  const currentTeam = metadata.teams.find((t) => t.id === editedTask.team.id);
+
+  const handleTeamChange = (teamId: string) => {
+    const newTeam = metadata.teams.find((t) => t.id === teamId)!;
+    setEditedTask({
+      ...editedTask,
+      team: { id: newTeam.id, name: newTeam.name },
+      // Clear assignee and tags when team changes as they might not be valid for new team
+      assignee: null,
+      tags: [],
+    });
+  };
+
+  const handleAssigneeChange = (memberId: string) => {
+    if (memberId === "unassigned") {
+      setEditedTask({
+        ...editedTask,
+        assignee: null,
+      });
+      return;
+    }
+    const member = currentTeam?.members.find((m) => m.id === memberId);
+    setEditedTask({
+      ...editedTask,
+      assignee: member ? { id: member.id, name: member.name } : null,
+    });
+  };
+
+  const handleAddTag = (tagId: string) => {
+    const tag = [
+      ...(currentTeam?.labels || []),
+      ...metadata.organizationLabels,
+    ].find((t) => t.id === tagId);
+    if (tag && !editedTask.tags.some((t) => t.id === tag.id)) {
+      setEditedTask({
+        ...editedTask,
+        tags: [...editedTask.tags, { id: tag.id, name: tag.name }],
+      });
+    }
+  };
+
+  const handleRemoveTag = (tagId: string) => {
+    setEditedTask({
+      ...editedTask,
+      tags: editedTask.tags.filter((t) => t.id !== tagId),
+    });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,9 +115,21 @@ export default function EditTask({ task, onSave, onCancel }: EditTaskProps) {
             >
               Team
             </Text>
-            <Text size="2" mb="1">
-              {editedTask.team.name}
-            </Text>
+            <Select.Root
+              value={editedTask.team.id}
+              onValueChange={handleTeamChange}
+            >
+              <Select.Trigger placeholder="Select team" />
+              <Select.Content>
+                <Select.Group>
+                  {metadata.teams.map((team) => (
+                    <Select.Item key={team.id} value={team.id}>
+                      {team.name}
+                    </Select.Item>
+                  ))}
+                </Select.Group>
+              </Select.Content>
+            </Select.Root>
           </Box>
 
           <Box>
@@ -89,10 +166,22 @@ export default function EditTask({ task, onSave, onCancel }: EditTaskProps) {
             >
               Assignee
             </Text>
-
-            <Text size="2" mb="1">
-              {editedTask.assignee?.name}
-            </Text>
+            <Select.Root
+              value={editedTask.assignee?.id || "unassigned"}
+              onValueChange={handleAssigneeChange}
+            >
+              <Select.Trigger placeholder="Select assignee" />
+              <Select.Content>
+                <Select.Group>
+                  <Select.Item value="unassigned">Unassigned</Select.Item>
+                  {currentTeam?.members.map((member) => (
+                    <Select.Item key={member.id} value={member.id}>
+                      {member.name}
+                    </Select.Item>
+                  ))}
+                </Select.Group>
+              </Select.Content>
+            </Select.Root>
           </Box>
 
           <Box>
@@ -177,13 +266,41 @@ export default function EditTask({ task, onSave, onCancel }: EditTaskProps) {
             >
               Tags
             </Text>
-
-            <Flex gap="2">
+            <Flex gap="2" wrap="wrap">
               {editedTask.tags.map((tag) => (
-                <Badge key={tag.id} color="gray" variant="outline">
-                  {tag.name}
+                <Badge
+                  key={tag.id}
+                  color="gray"
+                  variant="outline"
+                  onClick={() => handleRemoveTag(tag.id)}
+                  style={{ cursor: "pointer" }}
+                >
+                  {tag.name} ×
                 </Badge>
               ))}
+              <Select.Root onValueChange={handleAddTag}>
+                <Select.Trigger>
+                  <Badge color="gray" variant="outline">
+                    <PlusIcon /> Add Tag
+                  </Badge>
+                </Select.Trigger>
+                <Select.Content>
+                  <Select.Group>
+                    {[
+                      ...(currentTeam?.labels || []),
+                      ...metadata.organizationLabels,
+                    ]
+                      .filter(
+                        (tag) => !editedTask.tags.some((t) => t.id === tag.id),
+                      )
+                      .map((tag) => (
+                        <Select.Item key={tag.id} value={tag.id}>
+                          {tag.name}
+                        </Select.Item>
+                      ))}
+                  </Select.Group>
+                </Select.Content>
+              </Select.Root>
             </Flex>
           </Box>
 

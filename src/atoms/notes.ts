@@ -1,7 +1,7 @@
 import { askClaude } from "@/actions/ask-claude";
 import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
-import { addTaskAtom, Task, tasksAtom } from "./tasks";
+import { addTaskAtom, tasksAtom, metadataAtom } from "./tasks";
 
 export type NotesTab = "paste" | "upload";
 
@@ -37,10 +37,12 @@ export const processNotesAtom = atom(
         response = await askClaude(uploadedFile);
       }
 
-      const tasks = response as Task[];
-      tasks.forEach((task) => {
-        set(addTaskAtom, task);
-      });
+      if ("tasks" in response && "metadata" in response) {
+        set(metadataAtom, response.metadata);
+        response.tasks.forEach((task) => {
+          set(addTaskAtom, task);
+        });
+      }
     } catch (error) {
       console.error("Failed to process notes:", error);
     } finally {

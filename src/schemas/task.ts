@@ -11,7 +11,6 @@ export const confidenceSchema = z.union([
 export const prioritySchema = z.nativeEnum(Priority);
 
 export const taskSchema = z.object({
-  id: z.string(),
   title: z.string(),
   team: z.object({
     id: z.string(),

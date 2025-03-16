@@ -8,6 +8,7 @@ import {
   removeTaskAtom,
   selectedTasksAtom,
   tasksAtom,
+  metadataAtom,
 } from "@/atoms/tasks";
 import { useState } from "react";
 import { exportToLinear } from "@/actions/export-to-linear";
@@ -16,6 +17,7 @@ import { setSuccessAtom } from "@/atoms/success";
 
 export default function TasksCard() {
   const [tasks, setTasks] = useAtom(tasksAtom);
+  const [metadata] = useAtom(metadataAtom);
   const [, removeTask] = useAtom(removeTaskAtom);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [selectedTasks] = useAtom(selectedTasksAtom);
@@ -50,6 +52,7 @@ export default function TasksCard() {
         {editingTask ? (
           <EditTask
             task={editingTask}
+            metadata={metadata}
             onSave={handleSave}
             onCancel={() => setEditingTask(null)}
           />
@@ -88,7 +91,6 @@ export default function TasksCard() {
               </Flex>
 
               <Flex
-                px="4"
                 py="3"
                 justify="center"
                 style={{
@@ -96,11 +98,19 @@ export default function TasksCard() {
                   bottom: 0,
                   borderTop: "1px solid var(--gray-5)",
                   marginTop: "auto",
+                  width: "100%",
                 }}
               >
-                <Button onClick={handleExport}>
-                  <DownloadIcon />
-                  Export
+                <Button onClick={handleExport} style={{ width: "100%" }}>
+                  <Flex
+                    align="center"
+                    gap="2"
+                    justify="center"
+                    style={{ width: "100%" }}
+                  >
+                    <DownloadIcon />
+                    Export
+                  </Flex>
                 </Button>
               </Flex>
             </Flex>

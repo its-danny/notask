@@ -61,3 +61,20 @@ export const toggleTaskSelectionAtom = atom(
     set(selectedTasksAtom, [...selectedTasks, task]);
   },
 );
+
+export interface TeamMetadata {
+  id: string;
+  name: string;
+  members: { id: string; name: string }[];
+  labels: { id: string; name: string }[];
+}
+
+export interface Metadata {
+  teams: TeamMetadata[];
+  organizationLabels: { id: string; name: string }[];
+}
+
+export const metadataAtom = atomWithStorage<Metadata>("metadata", {
+  teams: [],
+  organizationLabels: [],
+});

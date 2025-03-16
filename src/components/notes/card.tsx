@@ -60,8 +60,17 @@ export default function NotesCard() {
       </Tabs.Root>
 
       <Flex justify="center" mt="2">
-        <Button disabled={isProcessing} onClick={() => processNotes()}>
-          <Flex align="center" gap="2">
+        <Button
+          disabled={isProcessing}
+          onClick={() => processNotes()}
+          style={{ width: "100%" }}
+        >
+          <Flex
+            align="center"
+            gap="2"
+            justify="center"
+            style={{ width: "100%" }}
+          >
             {isProcessing ? (
               <>
                 <ReloadIcon />

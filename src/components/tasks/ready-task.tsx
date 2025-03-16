@@ -18,7 +18,6 @@ interface TaskProps {
 
 export default function ReadyTask({ task, onEdit, onDelete }: TaskProps) {
   const [selectedTasks, toggleTaskSelection] = useAtom(toggleTaskSelectionAtom);
-  console.log(task);
 
   const confidenceColor = {
     high: "green",

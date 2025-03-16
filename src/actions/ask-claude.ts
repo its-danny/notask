@@ -86,7 +86,7 @@ export async function askClaude(input: string | File) {
                 "title": "The task title starting with an action verb",
                 "assignee": "assignee": {id: "assignee1", name: "assignee1"} or null if not specified
                 "due_date": "YYYY-MM-DD or null if not specified",
-                "priority": "No priority = 0, Urgent = 1, High = 2, Normal = 3, Low = 4",
+                "priority": No priority = 0, Urgent = 1, High = 2, Normal = 3, Low = 4,
                 "description": "Brief context from surrounding text",
                 "tags": [{id: "tag1", name: "tag1"}, {id: "tag2", name: "tag2"}] or [] if none specified,
                 "confidence": "high/medium/low based on how clearly this was stated in the notes",
@@ -133,10 +133,50 @@ export async function askClaude(input: string | File) {
     const parsedJson = JSON.parse(text);
     const validatedTasks = z.array(taskSchema).parse(parsedJson);
 
-    return validatedTasks;
+    return {
+      tasks: validatedTasks,
+      metadata: {
+        teams: teamsWithData.map((team) => ({
+          id: team.id,
+          name: team.name,
+          members: team.members.nodes.map((member) => ({
+            id: member.id,
+            name: member.name,
+          })),
+          labels: team.labels.nodes.map((label) => ({
+            id: label.id,
+            name: label.name,
+          })),
+        })),
+        organizationLabels: orgLabels.nodes.map((label) => ({
+          id: label.id,
+          name: label.name,
+        })),
+      },
+    };
   } catch (error) {
     console.error("Failed to parse or validate tasks:", error);
 
-    return [];
+    return {
+      tasks: [],
+      metadata: {
+        teams: teamsWithData.map((team) => ({
+          id: team.id,
+          name: team.name,
+          members: team.members.nodes.map((member) => ({
+            id: member.id,
+            name: member.name,
+          })),
+          labels: team.labels.nodes.map((label) => ({
+            id: label.id,
+            name: label.name,
+          })),
+        })),
+        organizationLabels: orgLabels.nodes.map((label) => ({
+          id: label.id,
+          name: label.name,
+        })),
+      },
+    };
   }
 }
