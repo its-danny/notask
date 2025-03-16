@@ -1,7 +1,7 @@
 import { askClaude } from "@/actions/ask-claude";
 import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
-import { addTaskAtom, Task } from "./tasks";
+import { addTaskAtom, Task, tasksAtom } from "./tasks";
 
 export const notesAtom = atomWithStorage<string>("notes", "");
 
@@ -19,6 +19,8 @@ export const processNotesAtom = atom(
 
     try {
       set(isProcessingAtom, true);
+
+      set(tasksAtom, []);
 
       const response = await askClaude(notes);
       const tasks = response as Task[];
