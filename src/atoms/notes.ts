@@ -45,7 +45,7 @@ export const processNotesAtom = atom(
       console.error("Failed to process notes:", error);
     } finally {
       set(isProcessingAtom, false);
-      // Clear the uploaded file after processing
+
       if (activeTab === "upload") {
         set(uploadedFileAtom, null);
       }

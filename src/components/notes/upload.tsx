@@ -1,3 +1,4 @@
+import { setErrorAtom } from "@/atoms/error";
 import { uploadedFileAtom } from "@/atoms/notes";
 import { UploadIcon, Cross2Icon } from "@radix-ui/react-icons";
 import { Badge, Box, Button, Flex, Text } from "@radix-ui/themes";
@@ -62,6 +63,7 @@ const RichTextIcon = () => (
 export default function Upload() {
   const [dragActive, setDragActive] = useState(false);
   const [uploadedFile, setUploadedFile] = useAtom(uploadedFileAtom);
+  const [, setError] = useAtom(setErrorAtom);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleDrag = (e: React.DragEvent) => {
@@ -102,8 +104,7 @@ export default function Upload() {
       const file = files[0];
 
       if (file.size > MAX_FILE_SIZE) {
-        alert("File is too large. Maximum size is 1.5MB.");
-
+        setError("File is too large. Maximum size is 1.5MB.");
         return;
       }
 
@@ -113,8 +114,9 @@ export default function Upload() {
       );
 
       if (!fileExtension || !acceptedExtensions.includes(fileExtension)) {
-        alert(`Invalid file type. Accepted types are: ${ACCEPTED_FILE_TYPES}`);
-
+        setError(
+          `Invalid file type. Accepted types are: ${ACCEPTED_FILE_TYPES}`,
+        );
         return;
       }
 
