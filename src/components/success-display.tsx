@@ -15,7 +15,6 @@ export default function SuccessDisplay() {
 
   useEffect(() => {
     if (success) {
-      // Trigger confetti
       confetti({
         particleCount: 100,
         spread: 70,
@@ -29,7 +28,7 @@ export default function SuccessDisplay() {
 
       return () => clearTimeout(timer);
     }
-  }, [success?.timestamp, clearSuccess]);
+  }, [success?.timestamp, clearSuccess, success]);
 
   if (!success) return null;
 
