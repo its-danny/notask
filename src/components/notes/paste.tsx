@@ -1,17 +1,26 @@
+"use client";
+
 import { notesAtom } from "@/atoms/notes";
-import { TextArea } from "@radix-ui/themes";
 import { useAtom } from "jotai";
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Placeholder from "@tiptap/extension-placeholder";
 
 export default function Paste() {
   const [notes, setNotes] = useAtom(notesAtom);
 
-  return (
-    <TextArea
-      rows={10}
-      autoFocus
-      placeholder="We need to do the thing; today!"
-      value={notes}
-      onChange={(ev) => setNotes(ev.target.value)}
-    />
-  );
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Placeholder.configure({
+        placeholder: "Paste your meeting notes here...",
+      }),
+    ],
+    content: notes,
+    onUpdate: ({ editor }) => {
+      setNotes(editor.getText());
+    },
+  });
+
+  return <EditorContent editor={editor} />;
 }
