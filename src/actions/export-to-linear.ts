@@ -20,26 +20,20 @@ export async function exportToLinear(tasks: Task[]) {
     accessToken: token,
   });
 
-  const exportedTasks = await Promise.all(
-    tasks.map(async (task) => {
-      const issuePayload = await linear.createIssue({
-        teamId: task.team.id,
-        title: task.title,
-        description: task.description,
-        assigneeId: task.assignee?.id,
-        dueDate: task.due_date,
-        priority: task.priority,
-        labelIds: task.tags.map((tag) => tag.id),
-      });
+  const batchResponse = await linear.createIssueBatch({
+    issues: tasks.map((task) => ({
+      teamId: task.team.id,
+      title: task.title,
+      description: task.description,
+      assigneeId: task.assignee?.id,
+      dueDate: task.due_date,
+      priority: task.priority,
+      labelIds: task.tags.map((tag) => tag.id),
+    })),
+  });
 
-      const issue = await issuePayload.issue;
-
-      return {
-        ...task,
-        url: issue?.url,
-      };
-    }),
-  );
-
-  return exportedTasks;
+  return tasks.map((task, index) => ({
+    ...task,
+    url: batchResponse.issues[index]?.url,
+  }));
 }
