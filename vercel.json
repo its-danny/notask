@@ -1,0 +1,7 @@
+{
+    "functions": {
+        "src/actions/ask-claude.ts": {
+            "maxDuration": 300
+        }
+    }
+}
