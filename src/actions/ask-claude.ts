@@ -1,11 +1,10 @@
 "use server";
 
 import { auth, clerkClient } from "@clerk/nextjs/server";
-import { generateText } from "ai";
+import { generateObject } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { LinearClient } from "@linear/sdk";
 import { taskSchema } from "@/schemas/task";
-import { z } from "zod";
 
 export async function askClaude(input: string | File) {
   const { userId } = await auth();
@@ -63,8 +62,10 @@ export async function askClaude(input: string | File) {
     textContent = input;
   }
 
-  const { text } = await generateText({
+  const { object } = await generateObject({
     model: anthropic("claude-3-7-sonnet-20250219"),
+    output: "array",
+    schema: taskSchema,
     system: `
         ## Instructions
 
@@ -99,21 +100,18 @@ export async function askClaude(input: string | File) {
 
         ## Response Format
 
-        Respond with a JSON array of objects. Do not wrap the JSON in a code block. Each object should represent one action item with the following structure:
+        The structure of the response is an array of objects. Each object should represent one action item with the following structure:
 
-        [
-            {
-                "team": {id: "team1", name: "team1"},
-                "title": "The task title starting with an action verb",
-                "assignee": "assignee": {id: "assignee1", name: "assignee1"} or null if not specified
-                "due_date": "YYYY-MM-DD or null if not specified",
-                "priority": No priority = 0, Urgent = 1, High = 2, Normal = 3, Low = 4,
-                "description": "Brief context from surrounding text",
-                "tags": [{id: "tag1", name: "tag1"}, {id: "tag2", name: "tag2"}] or [] if none specified,
-                "confidence": "high/medium/low based on how clearly this was stated in the notes",
-            },
-            // Additional action items...
-        ]
+        {
+            "team": {id: "team1", name: "team1"},
+            "title": "The task title starting with an action verb",
+            "assignee": {id: "assignee1", name: "assignee1"} or null if not specified
+            "due_date": "YYYY-MM-DD" or null if not specified
+            "priority": No priority = 0, Urgent = 1, High = 2, Normal = 3, Low = 4,
+            "description": "Brief context from surrounding text",
+            "tags": [{id: "tag1", name: "tag1"}, {id: "tag2", name: "tag2"}] or [] if none specified,
+            "confidence": "high/medium/low" based on how clearly this was stated in the notes,
+        },
 
         ## The person who is requesting the tasks
 
@@ -147,61 +145,27 @@ export async function askClaude(input: string | File) {
           ${tasks.map((task) => `- ${task.title}\n${task.description || ""}\nAssignee: ${task.assignee?.name || ""}\nTags: ${task.tags.join(", ")}`).join("\n")}
     `,
     prompt: textContent,
-    providerOptions: {
-      anthropic: {
-        thinking: { type: "enabled", budgetTokens: 12000 },
-      },
-    },
   });
 
-  try {
-    const parsedJson = JSON.parse(text);
-    const validatedTasks = z.array(taskSchema).parse(parsedJson);
-
-    return {
-      tasks: validatedTasks,
-      metadata: {
-        teams: teamsWithData.map((team) => ({
-          id: team.id,
-          name: team.name,
-          members: team.members.nodes.map((member) => ({
-            id: member.id,
-            name: member.name,
-          })),
-          labels: team.labels.nodes.map((label) => ({
-            id: label.id,
-            name: label.name,
-          })),
+  return {
+    tasks: object,
+    metadata: {
+      teams: teamsWithData.map((team) => ({
+        id: team.id,
+        name: team.name,
+        members: team.members.nodes.map((member) => ({
+          id: member.id,
+          name: member.name,
         })),
-        organizationLabels: orgLabels.nodes.map((label) => ({
+        labels: team.labels.nodes.map((label) => ({
           id: label.id,
           name: label.name,
         })),
-      },
-    };
-  } catch (error) {
-    console.error("Failed to parse or validate tasks:", error);
-
-    return {
-      tasks: [],
-      metadata: {
-        teams: teamsWithData.map((team) => ({
-          id: team.id,
-          name: team.name,
-          members: team.members.nodes.map((member) => ({
-            id: member.id,
-            name: member.name,
-          })),
-          labels: team.labels.nodes.map((label) => ({
-            id: label.id,
-            name: label.name,
-          })),
-        })),
-        organizationLabels: orgLabels.nodes.map((label) => ({
-          id: label.id,
-          name: label.name,
-        })),
-      },
-    };
-  }
+      })),
+      organizationLabels: orgLabels.nodes.map((label) => ({
+        id: label.id,
+        name: label.name,
+      })),
+    },
+  };
 }
