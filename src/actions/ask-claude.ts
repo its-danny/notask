@@ -6,6 +6,8 @@ import { anthropic } from "@ai-sdk/anthropic";
 import { LinearClient } from "@linear/sdk";
 import { taskSchema } from "@/schemas/task";
 
+export const maxDuration = 300;
+
 export async function askClaude(input: string | File) {
   const { userId } = await auth();
 
