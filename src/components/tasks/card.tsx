@@ -1,5 +1,5 @@
-import { Card, Flex, Heading, Button } from "@radix-ui/themes";
-import { CheckboxIcon, DownloadIcon } from "@radix-ui/react-icons";
+import { Card, Flex, Button } from "@radix-ui/themes";
+import { DownloadIcon, ReloadIcon } from "@radix-ui/react-icons";
 import ReadyTask from "./ready-task";
 import EditTask from "./edit";
 import { useAtom } from "jotai";
@@ -14,6 +14,7 @@ import { useState } from "react";
 import { exportToLinear } from "@/actions/export-to-linear";
 import ExportedTask from "./exported-task";
 import { setSuccessAtom } from "@/atoms/success";
+import { resetNotesAtom } from "@/atoms/notes";
 
 export default function TasksCard() {
   const [tasks, setTasks] = useAtom(tasksAtom);
@@ -22,6 +23,7 @@ export default function TasksCard() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [selectedTasks] = useAtom(selectedTasksAtom);
   const [, setSuccess] = useAtom(setSuccessAtom);
+  const [, resetNotes] = useAtom(resetNotesAtom);
 
   const handleSave = (updatedTask: Task) => {
     setTasks(
@@ -58,11 +60,6 @@ export default function TasksCard() {
           />
         ) : (
           <>
-            <Flex align="center" gap="2" mb="4">
-              <CheckboxIcon />
-              <Heading size="3">Tasks</Heading>
-            </Flex>
-
             <Flex
               direction="column"
               style={{
@@ -101,17 +98,25 @@ export default function TasksCard() {
                   width: "100%",
                 }}
               >
-                <Button onClick={handleExport} style={{ width: "100%" }}>
-                  <Flex
-                    align="center"
-                    gap="2"
-                    justify="center"
-                    style={{ width: "100%" }}
-                  >
-                    <DownloadIcon />
-                    Export
-                  </Flex>
-                </Button>
+                <Flex gap="2">
+                  <Button onClick={handleExport} style={{ flex: 1 }}>
+                    <Flex
+                      align="center"
+                      gap="2"
+                      justify="center"
+                      style={{ width: "100%" }}
+                    >
+                      <DownloadIcon />
+                      Export
+                    </Flex>
+                  </Button>
+                  <Button onClick={resetNotes} variant="soft" color="gray">
+                    <Flex align="center" gap="2">
+                      <ReloadIcon />
+                      Start Over
+                    </Flex>
+                  </Button>
+                </Flex>
               </Flex>
             </Flex>
           </>

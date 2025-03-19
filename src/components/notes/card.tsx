@@ -1,8 +1,7 @@
 "use client";
 
-import { Box, Button, Card, Flex, Heading, Tabs, Text } from "@radix-ui/themes";
+import { Box, Button, Card, Flex, Tabs, Text } from "@radix-ui/themes";
 import {
-  FileTextIcon,
   MagicWandIcon,
   UpdateIcon,
   UploadIcon,
@@ -20,11 +19,6 @@ export default function NotesCard() {
   return (
     <Card>
       <Flex direction="column" gap="2" mb="2">
-        <Flex align="center" gap="2">
-          <FileTextIcon />
-          <Heading size="3">Notes</Heading>
-        </Flex>
-
         <Text color="gray" size="2">
           Paste your notes or upload a file — I&apos;ll handle the rest.
         </Text>

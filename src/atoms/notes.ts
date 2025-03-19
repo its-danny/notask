@@ -1,7 +1,7 @@
 import { askClaude } from "@/actions/ask-claude";
 import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
-import { addTaskAtom, tasksAtom, metadataAtom } from "./tasks";
+import { addTaskAtom, tasksAtom, metadataAtom, Metadata } from "./tasks";
 
 export type NotesTab = "paste" | "upload";
 
@@ -54,3 +54,11 @@ export const processNotesAtom = atom(
     }
   },
 );
+
+export const resetNotesAtom = atom(null, (get, set) => {
+  set(notesAtom, "");
+  set(uploadedFileAtom, null);
+  set(activeTabAtom, "paste");
+  set(tasksAtom, []);
+  set(metadataAtom, { teams: [], organizationLabels: [] } as Metadata);
+});
